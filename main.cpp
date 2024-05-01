@@ -4,21 +4,45 @@
 #include <locale.h>
 #include <time.h> 
 
-#include "cards.h"
+#include "games.h"
+#include "inventorySystem.h"
 
 int main()
 {    
-    srand(time(NULL)); //Initialize random number generator
+
+    Inventory p_inv(500);
+    Inventory d_inv(1000);
+
     setlocale(LC_ALL, ".UTF-8"); // Needed to properly display Unicode in VSCode Terminal
     std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
 
-    Card card1;
-    Card card2;
-    Card card3;
+    std::cout << "Welcome to the casino.\n"
+    "Don't stress about the time.\n"
+    "Enter a digit to pick your poison:\n"
+    "1: Blackjack\n"
+    "2: Exit.\n\n";
 
-    std::cout << card1.display_card() << "\n";
-    std::cout << card2.display_card() << "\n";
-    std::cout << card3.display_card() << "\n";
+    std::string choice;
+    do {
+        std::cin >> choice;
+        if (!std::isdigit(choice[0]) || (std::stoi(choice) >= 2) || (std::stoi(choice) < 1)){ // If input is not a digit OR the input digit is outside range
+            std::cout << "Not a valid choice, partner. Try again.\n";
+        };
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    } while(!std::isdigit(choice[0]) || (std::stoi(choice) >= 2) || (std::stoi(choice) < 1));  
+
+    int choice_switch = stoi(choice);
+    switch(choice_switch) {
+        case 1: {
+            BlackJack game(p_inv, d_inv);
+            game.initialize();
+            break;
+        };
+        case 2:
+            std::cout << "Come back when you've got something to lose.\n";
+            break;
+    };
 
     return true;
-}
+};
