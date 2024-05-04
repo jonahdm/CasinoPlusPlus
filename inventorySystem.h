@@ -14,9 +14,9 @@ class Inventory{
     public:
         int money;
         std::vector<Item> itemList;
-        
-    Inventory() {money = 0;}
-    Inventory(int m) {money = m;}
+
+    Inventory(): money(0), itemList({}) {}
+    Inventory(int m): money(m), itemList({}) {}
 
     void add_item(Item i){
         itemList.push_back(i);

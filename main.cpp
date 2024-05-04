@@ -5,13 +5,16 @@
 #include <time.h> 
 
 #include "games.h"
-#include "inventorySystem.h"
+#include "cards.h"
+#include "inventorySystem.h"1
 
 int main()
 {    
 
     Inventory p_inv(500);
     Inventory d_inv(1000);
+    std::vector<std::string> player_names = {"Player", "Dealer"};
+    std::vector<Inventory> player_inventories = {p_inv, d_inv};
 
     setlocale(LC_ALL, ".UTF-8"); // Needed to properly display Unicode in VSCode Terminal
     std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
@@ -35,7 +38,7 @@ int main()
     int choice_switch = stoi(choice);
     switch(choice_switch) {
         case 1: {
-            BlackJack game(p_inv, d_inv);
+            BlackJack game(player_names, player_inventories);
             game.initialize();
             break;
         };

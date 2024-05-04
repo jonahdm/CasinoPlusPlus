@@ -1,6 +1,10 @@
-#include <string>
+#ifndef CARDS
+#define CARDS
+
 #include <algorithm>
+#include <numeric>       
 #include <random>
+#include <string>
 #include <vector>
 
 class Card {
@@ -8,7 +12,10 @@ class Card {
         int value; // Supports values 1 - 13
         int suit; // Supports values 0 - 3
 
-        Card (int v = rand() % 13 + 1, int s =  rand() % 4) {value = v; suit = s;}
+        Card (int v = rand() % 13 + 1, int s =  rand() % 4):
+            value(v),
+            suit(s)
+            {}
         
         void generate_random_card () {
             //srand (time(NULL));
@@ -47,6 +54,18 @@ class Deck {
 
     int size(){
         return contents.size();
+    };
+
+    int get_total_value(){
+        int sum = 0;
+        for (int i = 0; i < size(); ++i){
+            if (contents[i].value > 10) { // Face cards are worth 10
+                sum += 10;
+            } else {
+            sum += contents[i].value;
+            };
+        };
+        return sum;
     };
 
     void add_top_card(Card new_card){
@@ -103,3 +122,5 @@ class Deck {
         };
     };
 };
+
+#endif //CARDS
