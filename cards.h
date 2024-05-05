@@ -18,7 +18,6 @@ class Card {
             {}
         
         void generate_random_card () {
-            //srand (time(NULL));
             value = rand() % 13 + 1;
             suit = rand() % 4;
         }
@@ -96,7 +95,14 @@ class Deck {
         std::shuffle(contents.begin(), contents.end(), rng);
     };
     
-    Deck draw_n_cards(int n){
+    Card draw_top_card() {
+        Card drawn_card =  contents.back();
+        contents.pop_back();
+        return drawn_card;
+    };
+
+
+    Deck draw_n_cards(int n) {
         Deck drawn_cards;
         std::vector<Card> drawn_contents(contents.end() - n, contents.end());
         drawn_cards.add_top_deck(drawn_contents);
