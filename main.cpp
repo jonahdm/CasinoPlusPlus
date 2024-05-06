@@ -6,26 +6,26 @@
 
 #include "games.h"
 #include "cards.h"
-#include "inventorySystem.h"
+#include "inventories.h"
+#include "players.h"
 
 int main()
 {    
+    Player p("Player", "human", 500);
+    Player d("Dean", "player", 1000);
+    Player a("Alan", "player", 500); 
+    Player b("Bob", "player", 500);
+    std::vector<Player *> players = {&p , &d, &a, &b};
 
-    Inventory p_inv(500);
-    Inventory d_inv(1000);
-    std::vector<std::string> player_names = {"Player", "Dealer"};
-    std::vector<Inventory> player_inventories = {p_inv, d_inv};
-        
     setlocale(LC_ALL, ".UTF-8"); // Needed to properly display Unicode in VSCode Terminal
     std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
 
     std::cout << "Welcome to the casino.\n"
-    "Don't stress about the time.\n"
     "Enter a digit to pick your poison:\n"
     "1: Blackjack\n"
     "2: Exit.\n\n";
 
-
+    
     std::string choice;
     do {
         std::cin >> choice;
@@ -40,13 +40,14 @@ int main()
 
     switch(choice_switch) {
         case 1: {
-            BlackJack game(player_names, player_inventories);
-            game.initialize();
+            BlackJack game(players);
             break;
-        };
-        case 2:
+        }
+        case 2: {
             std::cout << "Come back when you've got something to lose.\n";
             break;
-    };
+        }
+    }   
+
     return true;
 };

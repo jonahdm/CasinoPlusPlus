@@ -1,5 +1,5 @@
-#ifndef INVENTORY_SYSTEM
-#define INVENTORY_SYSTEM
+#ifndef INVENTORIES
+#define INVENTORIES
 
 #include <iostream>
 #include <string>
@@ -20,17 +20,17 @@ class Inventory{
 
     void add_item(Item i){
         itemList.push_back(i);
-    };
+    }
 
-    Inventory operator+=(const int& n){
-        this -> money += n;
+    Inventory operator+=(int n){
+        money += n;
         return  *this;
-    };
+    }
 
-    Inventory operator-=(const int& n){
-        this -> money -= n;
+    Inventory operator-=(int n){
+        money -= n;
         return  *this;
-    };
+    }
 };
 
-#endif //INVENTORY_SYSTEM
+#endif //INVENTORIES

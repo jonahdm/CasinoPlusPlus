@@ -58,6 +58,10 @@
         "array": "cpp",
         "span": "cpp",
         "set": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "list": "cpp",
+        "unordered_map": "cpp",
+        "functional": "cpp",
+        "xhash": "cpp"
     }
 }

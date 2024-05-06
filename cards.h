@@ -22,7 +22,7 @@ class Card {
             suit = rand() % 4;
         }
 
-        std::string display_card_value () {
+        std::string get_value_display () {
             switch(value){
                 case 1: return "A";
                 case 11: return "J";
@@ -32,7 +32,7 @@ class Card {
             }
         }
 
-        std::string display_card_suit () {
+        std::string get_suit_display () {
             switch(this -> suit){
                 case 0: return "\033[1;30m♠\033[0m"; //Black Spade
                 case 1: return "\033[1;31m♥\033[0m"; //Red Heart
@@ -42,8 +42,8 @@ class Card {
             }
         }
 
-        std::string display_card() {
-            return display_card_value() + display_card_suit();
+        std::string get_card_display() {
+            return get_value_display() +get_suit_display();
         }
 };
 
@@ -53,7 +53,7 @@ class Deck {
 
     int size(){
         return contents.size();
-    };
+    }
 
     int get_total_value(){
         int sum = 0;
@@ -62,44 +62,44 @@ class Deck {
                 sum += 10;
             } else {
             sum += contents[i].value;
-            };
-        };
+            }
+        }
         return sum;
-    };
+    }
 
     void add_top_card(Card new_card){
         contents.push_back(new_card);
-    };
+    }
 
     void add_top_deck(std::vector<Card> deck_in){
         contents.insert(contents.end(), std::begin(deck_in), std::end(deck_in));
-    };
+    }
 
     void add_top_deck(Deck deck_in){
         contents.insert(contents.end(), std::begin(deck_in.contents), std::end(deck_in.contents));
-    };
+    }
 
     void add_bottom_deck(std::vector<Card> deck_in){
         contents.insert(contents.begin(), std::begin(deck_in), std::end(deck_in));
-    };
+    }
 
     void add_bottom_deck(Deck deck_in){
         contents.insert(contents.begin(), std::begin(deck_in.contents), std::end(deck_in.contents));
-    };
+    }
 
     void add_bottom_card(Card new_card){  
         contents.insert(contents.begin(), new_card);
-    };
+    }
 
     void shuffle_deck(std::default_random_engine rng){
         std::shuffle(contents.begin(), contents.end(), rng);
-    };
+    }
     
     Card draw_top_card() {
         Card drawn_card =  contents.back();
         contents.pop_back();
         return drawn_card;
-    };
+    }
 
 
     Deck draw_n_cards(int n) {
@@ -110,12 +110,12 @@ class Deck {
         contents.resize(contents.size()-n);
 
         return drawn_cards;
-    };         
+    }       
 
-    std::string display_contents(){
+    std::string get_contents_display(){
         std::string output = "";
         for (Card this_card: contents)
-            output += this_card.display_card() + " ";
+            output += this_card.get_card_display() + " ";
         return output;
     }
 
@@ -124,9 +124,9 @@ class Deck {
         for (int suit = 0; suit <= 3; ++suit){
             for (int value = 1; value <= 13; ++value){
                 contents.push_back(Card(value, suit));
-            };
-        };
-    };
+            }
+        }
+    }
 };
 
 #endif //CARDS
