@@ -12,7 +12,7 @@
 int main()
 {    
     Player p("Player", "human", 500);
-    Player d("Dean", "player", 1000);
+    Player d("Dean", "dealer", 1000);
     Player a("Alan", "player", 500); 
     Player b("Bob", "player", 500);
     std::vector<Player *> players = {&p , &d, &a, &b};
@@ -21,7 +21,7 @@ int main()
     std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
 
     std::cout << "Welcome to the casino.\n"
-    "Enter a digit to pick your poison:\n"
+    "Enter a digit to pick your poison:\n\n"
     "1: Blackjack\n"
     "2: Exit.\n\n";
 

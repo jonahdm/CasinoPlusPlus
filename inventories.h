@@ -18,18 +18,16 @@ class Inventory{
     Inventory(): money(0), itemList({}) {}
     Inventory(int m): money(m), itemList({}) {}
 
-    void add_item(Item i){
+    void operator+=(Item i){
         itemList.push_back(i);
     }
 
-    Inventory operator+=(int n){
+    void operator+=(int n){
         money += n;
-        return  *this;
     }
 
-    Inventory operator-=(int n){
+    void operator-=(int n){
         money -= n;
-        return  *this;
     }
 };
 

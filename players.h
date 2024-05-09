@@ -12,7 +12,7 @@ class Player {
         int type; //0 = Human Player, 1 = Computer Player, 2 = Computer Dealer
 
         Deck hand;
-        int score;
+        int current_bet = 0;
 
     Player(std::string name, int type, int money = 0): name(name), type(type), inventory(Inventory(money)) {
     }
@@ -30,6 +30,9 @@ class Player {
         }
     }
 
+    int get_current_money(){
+        return inventory.money;
+    }
 
 };
 
