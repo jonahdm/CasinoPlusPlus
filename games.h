@@ -2,6 +2,7 @@
 #define GAMES
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <random>
 #include <set>
@@ -31,31 +32,73 @@ class Game {
         }
 
         std::string choice;
+        int ichoice = -1;
         do {
             std::cin >> choice;
-            if (!std::isdigit(choice[0]) || (std::stoi(choice) > actions.size() || (std::stoi(choice) == 0))) { // If input isn't a number OR the input digit is outside acceptable range
-                std::cout << "Not a valid choice, partner. Try again.\n";
-            };
+            if (!std::isdigit(choice[0])) { // If the input isn't a number
+                std::cout << "You need to bet a NUMBER. Try again.\n";
+            } else {
+                ichoice = stoi(choice);
+                if ((ichoice  > actions.size() || (ichoice  == 0))) { // If input isn't a number OR the input digit is outside acceptable range
+                    std::cout << "Not a valid choice, partner. Try again.\n";
+                }
+            }
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        } while(!std::isdigit(choice[0]) || (std::stoi(choice) > actions.size() || (std::stoi(choice) == 0)));   
+        } while(!std::isdigit(choice[0]) || (ichoice > actions.size() || (ichoice == 0)));   
 
-        return std::stoi(choice) - 1;
+        return ichoice  - 1;
     }
 
     // Prompt the user to make a bet
-    int make_bet(int min_bet = 10, int max_bet = 500){
-        std::cout << "Please enter your bet amount, at least $" << min_bet << " and up to $" << max_bet << "\nYou can enter 0 to pass this round.\n";
+    int make_bet(Player* curr_player, int min_bet = 10, int max_bet = 500){
         
-        std::string bet;
-        do {
-            std::cin >> bet;
-            if (!std::isdigit(bet[0]) || (std::stoi(bet) < min_bet || std::stoi(bet) < 0) || (std::stoi(bet) > max_bet)) { // If input is not a numer OR the input digit is outside acceptable range
-                std::cout << "That bet ain't right. Try again.\n";
-            }
-        }while (!std::isdigit(bet[0]) || (std::stoi(bet) < min_bet || std::stoi(bet) < 0) || (std::stoi(bet) > max_bet));
+        int ibet = -1;
+        int* curr_money = &curr_player->inventory.money;
 
-        return std::stoi(bet);
+        if (curr_player->type == 0){
+            std::cout << "You have $" << *curr_money << "\n";
+            std::cout << "Please enter your bet amount, at least $" << min_bet << " and up to $" << max_bet << "\nYou can enter 0 to pass this round.\n";
+            
+            std::string bet;
+            do {
+                std::cin >> bet;
+                if (!std::isdigit(bet[0])) { // If the input isn't a number
+                    std::cout << "You need to bet a NUMBER. Try again.\n";
+                } else {
+                    ibet = stoi(bet);
+                    if (ibet > *curr_money){
+                        std::cout << "You can't bet more than you got! Try again.\n";
+                    }
+                    else if (((ibet < min_bet || ibet < 0) && (ibet != 0)) || ((ibet > max_bet))){ 
+                        std::cout << "That bet ain't right. Try again.\n";
+                    }
+                }
+            }while (!std::isdigit(bet[0]) || (ibet > *curr_money) || ((ibet < min_bet || ibet < 0) && (ibet != 0)) || ((ibet > max_bet)));
+            
+            if (ibet > 0){
+                std::cout <<  "You bet $" << ibet << "\n";
+                curr_player -> inventory -= ibet;
+                curr_player -> current_bet += ibet;
+
+            } else {
+                std::cout <<  "You pass this round.\n";
+            }
+
+        } else {
+            ibet = min_bet; // This will be updated to have computers make a semi-random bet based on their "personality"
+            
+            if (ibet > 0){
+                std::cout <<  curr_player -> name << " bets $" << ibet << "\n";
+                curr_player -> inventory -= ibet;
+                curr_player -> current_bet += ibet;
+
+            } else {
+                std::cout << curr_player -> name << " passes this round.\n";
+            }
+        }
+
+        return ibet;
     }
 
     void win_bet(Player* player, int odds){
@@ -79,17 +122,12 @@ class BlackJack : public Game{
         Deck deck;
         std::default_random_engine rng;
 
-    BlackJack(std::vector<Player*> players) : Game (players) {
-        
-        //Initialize random number generator
-        srand(time(NULL)); 
-        std::random_device rd; 
-        rng = std::default_random_engine { rd() };
+        int dealer_score;
 
+    BlackJack(std::vector<Player*> players) : Game (players) {
         // Ensure that there is only one Dealer, and that they are last in the turn order
         bool dealer_found = false;
         for (int i = 0;  i < players.size();  ++ i){
-            
             if ((players[i] -> type == 2) && !(i == players.size() - 1) && (dealer_found == false)) { // If the player is a dealer, and isn't at the end of the turn order, and a dealer hasn't already been found
                 std::rotate(players.begin() + i, players.begin() + (i + 1) , players.end());
                 dealer_found = true;
@@ -110,8 +148,14 @@ class BlackJack : public Game{
     }
 
     bool new_game() {
+
+        //Initialize random number generator
+        srand(time(NULL)); 
+        std::random_device rd; 
+        rng = std::default_random_engine { rd() };
+
         // Establish the first set of viable actions in the game
-        actions = {"Hit", "Stand", "Double", "Fold"};
+        actions = {"Hit", "Stand", "Double", "Surrender"};
 
         // Print out new game text (with colorful symbols!)
         std::cout << "\n\033[1;30m♠\033[0m\033[1;31m♥\033[0m\033[1;31m♦\033[0m\033[1;30m♣\033[0m "
@@ -122,59 +166,68 @@ class BlackJack : public Game{
         deck.build_standard_deck();
         deck.shuffle_deck(rng);
 
-        std::cout << "You have $" << players[0]->inventory.money << "\n";
-
+        Player* dealer;
         for (int i = 0; i < players.size(); ++ i){
-            int bet = make_bet();
-
-            if (bet > 0){
-                std::cout << players[i] -> name << " bets $" << bet << "\n";
-
-                Deck new_deck;
-                players[i] -> inventory -= bet;
-                players[i] -> current_bet += bet;
-
-                players[i] -> hand = new_deck;
-                players[i] -> hand.add_top_deck(deck.draw_n_cards(2)); // Deal two from the top
+            
+            if (players[i]-> type == 2){ // Checks if currenty player is the dealer
+                    Deck new_deck;
+                    players[i] -> hand = new_deck;
+                    
+                    players[i] -> hand.add_top_deck(deck.draw_n_cards(1)); // Dealer only gets 1 card to start
+                    dealer = players[i]; // Create a reference to the dealer for later
+                    dealer->current_score = dealer->hand.get_total_value_blackjack();
             } else {
-                std::cout << players[i] -> name << " passes this round.\n";
-                inactive_ids.push_back(i);
+                int bet = make_bet(players[i]);
+                if (bet > 0){
+                    Deck new_deck;
+                    players[i] -> hand = new_deck;
+                    players[i] -> hand.add_top_deck(deck.draw_n_cards(2)); // Deal two from the top
+                    players[i] ->current_score = players[i]->hand.get_total_value_blackjack();
+                } else {
+                        inactive_ids.push_back(i);
+                }
             }
-
         }
+
+        dealer_score = dealer -> hand.get_total_value_blackjack(); // Get the score from the last player, who should always be the dealer.
 
         std::cout << "\n";
         display_game_state();
 
-        int dealer_score;
-        // Players in the game make their decisions in play order until they hold or are out
+        // Players in the game make their decisions in play order until they choose to stop or bust
         for (int i = 0; i < players.size(); ++ i){
             if (!(std::find(inactive_ids.begin(), inactive_ids.end(), i) != inactive_ids.end())){ // If the current player id is not in the inactive list
                 bool first_move = true;          
                 bool curr_player_active = true;
                 do {
                     if (first_move == true){
-                        std::cout << "\n" << players[i]->name << "'s turn! ";
-                        display_current_player_hand(players[i]);
-                        first_move = false;
+                        if (players[i]->current_score == 21){
+                            // 21 on the first hand is a BlackJack, which pays 3:2 odds.
+                            std::cout << "\n" << players[i]->name << " Has BlackJack! ";
+                            players[i]->current_bet =  round((players[i]->current_bet) * 3/2);
+                            curr_player_active = false;
+                            continue;
+                        } else {
+                            std::cout << "\n" << players[i]->name << "'s turn! ";
+                            display_current_player_hand(*players[i]);
+                            first_move = false;
+                        }
                     }
                     curr_player_active = next_move(players[i]);
                 } while (curr_player_active == true);
-
-                if (i == players.size() - 1){
-                    dealer_score = players[i] -> hand.get_total_value(); // Get the score from the last player, who should always be the dealer.
-                }
             }
         }
-    
+
+        dealer_score = dealer -> hand.get_total_value_blackjack(); // Get the score from the last player, who should always be the dealer.
         std::cout << "\n";
         display_game_state();
         std::cout << "\n";
 
-        for (int i = 0; i < players.size() - 1; ++ i){ // size() - 1 because we don't score score against the dealer.
+        // For each active player, check their score against the dealer's to determine win/loss/tie
+        for (int i = 0; i < players.size() - 1; ++ i){ // size() - 1 because we don't score against the dealer.
             if (!(std::find(inactive_ids.begin(), inactive_ids.end(), i) != inactive_ids.end())){ // If the current player id is not in the inactive list OR current player is not the dealer.
                 Player* curr_player = players[i];
-                int player_score = curr_player -> hand.get_total_value();
+                int player_score = curr_player->current_score;
 
                 if ((player_score > 21) || (player_score < dealer_score) && (dealer_score <= 21)){ // If the player busted, or their score was less than the dealer's
                     std::cout << curr_player->name << " Loses $" << curr_player->current_bet << "!\n";
@@ -206,9 +259,21 @@ class BlackJack : public Game{
     }
 
     bool next_move(Player* curr_player) {
-        std::cout << "\nSelect your next move:\n";
-        std::string selection = actions[action_select()];
         bool has_legal_moves = true;
+        std::string selection;
+
+        switch(curr_player->type){
+            case 0:
+                std::cout << "\nSelect your next move:\n";
+                selection = actions[action_select()];
+                break;
+            case 1:
+                selection = player_choose_move(*curr_player);
+                break;
+            case 2:
+                selection = dealer_choose_move(*curr_player);
+                break;
+        }
 
         if (selection == "Hit") {
             std::cout << curr_player->name << " Hits! ";
@@ -227,18 +292,18 @@ class BlackJack : public Game{
         } else if (selection == "Split") {
             std::cout << curr_player->name << " Splits! ";
 
-        } else if (selection == "Fold") {
-            std::cout << curr_player->name << " Folds! ";
+        } else if (selection == "Surrender") {
+            std::cout << curr_player->name << " Surrenders! ";
             has_legal_moves = false;
         }
 
-        display_current_player_hand(curr_player);
-        int curr_player_score = curr_player->hand.get_total_value();
+        display_current_player_hand(*curr_player);
+        curr_player->current_score = curr_player->hand.get_total_value_blackjack();
 
-        if (curr_player_score > 21){
+        if (curr_player->current_score > 21){
             std::cout << curr_player->name << " Busts!\n";
             has_legal_moves = false;
-        } else if (curr_player_score == 21){
+        } else if (curr_player->current_score == 21){
             std::cout << curr_player->name << " Has 21!\n";
             has_legal_moves = false;
         } else {
@@ -269,8 +334,32 @@ class BlackJack : public Game{
         }
     }
 
-    void display_current_player_hand(Player* curr_player) {
-        std::cout << curr_player->name << "'s Hand is: " << curr_player->hand.get_contents_display() << "\n";
+    void display_current_player_hand(Player& curr_player) {
+        std::cout << curr_player.name << "'s Hand is: " << curr_player.hand.get_contents_display() << "\n";
+    }
+
+    std::string player_choose_move(Player& curr_player) { // Reference to player here for future implementation of stats to weight decisions
+        int curr_score = curr_player.current_score;
+        if ((curr_score <= 16)){
+            if ((dealer_score >= 7 || curr_score <= 12) ||
+                (dealer_score <= 6 && curr_score <= 11) ||
+                (dealer_score <= 3 && curr_score <= 12)) {
+                 return "Hit";
+            } else {
+                return "Stand";
+            }
+        } else {
+            return "Stand";
+        }
+    }
+
+    std::string dealer_choose_move(Player& curr_player) { // Reference to player here for future implementation of stats to weight decisions
+        int curr_score = curr_player.current_score;
+        if (curr_score <= 16){
+            return "Hit";
+        } else {
+            return "Stand";
+        }
     }
 
 };

@@ -3,8 +3,9 @@
 
 #include <string>
 
-#include "inventories.h"
 #include "cards.h"
+#include "inventories.h"
+
 class Player {
     public:
         std::string name;
@@ -13,6 +14,7 @@ class Player {
 
         Deck hand;
         int current_bet = 0;
+        int current_score = 0;
 
     Player(std::string name, int type, int money = 0): name(name), type(type), inventory(Inventory(money)) {
     }
@@ -25,7 +27,7 @@ class Player {
             type = 1;
         } else if (p_type == "dealer"){
             type = 2;
-        } else { // Default to computer player for now
+        } else { // Default new players to computer players
             type = 1;
         }
     }
@@ -33,7 +35,6 @@ class Player {
     int get_current_money(){
         return inventory.money;
     }
-
 };
 
 

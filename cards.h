@@ -55,14 +55,27 @@ class Deck {
         return contents.size();
     }
 
-    int get_total_value(){
+    int get_total_value_blackjack(){
         int sum = 0;
+        bool any_ace = false;
+
         for (int i = 0; i < size(); ++i){
-            if (contents[i].value > 10) { // Face cards are worth 10
+            if (contents[i].value == 1){
+                // Aces are scored as either 1 or 11, depending on what's best for the player
+                if (sum < 11) {
+                    sum += 11;
+                } else {
+                    sum += 1;
+                }
+                any_ace = true;
+            } else if (contents[i].value > 10) { // Face cards are worth 10
                 sum += 10;
             } else {
-            sum += contents[i].value;
+                sum += contents[i].value;
             }
+        }
+        if ((sum > 21) && (any_ace == true)){ // If the hand would be a bust, treat the first ace as a 1 instead of an 11
+            sum -= 10;
         }
         return sum;
     }
@@ -114,7 +127,7 @@ class Deck {
 
     std::string get_contents_display(){
         std::string output = "";
-        for (Card this_card: contents)
+        for (Card this_card : contents)
             output += this_card.get_card_display() + " ";
         return output;
     }

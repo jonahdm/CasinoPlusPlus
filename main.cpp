@@ -10,7 +10,7 @@
 #include "players.h"
 
 int main()
-{    
+{
     Player p("Player", "human", 500);
     Player d("Dean", "dealer", 1000);
     Player a("Alan", "player", 500); 
