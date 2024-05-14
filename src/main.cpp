@@ -4,13 +4,14 @@
 #include <locale.h>
 #include <time.h> 
 
-#include "games.h"
-#include "cards.h"
-#include "inventories.h"
-#include "players.h"
+#include "..\include\games.h"
+#include "..\include\cards.h"
+#include "..\include\inventories.h"
+#include "..\include\players.h"
 
 int main()
 {
+    std::cout <<  "${workspaceFolder}" << "\n";
     Player p("Player", "human", 500);
     Player d("Dean", "dealer", 1000);
     Player a("Alan", "player", 500); 
