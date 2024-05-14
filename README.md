@@ -1,10 +1,10 @@
 # CasinoPlusPlus
-CasinoPlusPlus is my way of becomming more familiar with C++ by developing simple casino games. Games are run in-terminal, with confirmed execution via Visual Studio Code run in Windows.
+CasinoPlusPlus is my way of becomming more familiar with C++ by developing simple casino games. Games are run text-based, with confirmed execution in Windows.
 
 ## Current Features
 
 ### Main.cpp
-Configured to execute a terminal-based game loop, where the user is given their choice of game with three computer players. 
+Configured to execute a text-based game loop, where the user is given their choice of game with three computer players. 
 
 ### Games.h and Cards.h
 The building blocks for games of chance. Currently only supports BlackJack (With dealer standing on soft 17, and splits not available).
