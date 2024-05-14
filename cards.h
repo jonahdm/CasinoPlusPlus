@@ -34,13 +34,23 @@ class Card {
 
         std::string get_suit_display () {
             switch(this -> suit){
-                case 0: return "\033[1;30m♠\033[0m"; //Black Spade
-                case 1: return "\033[1;31m♥\033[0m"; //Red Heart
-                case 2: return  "\033[1;31m♦\033[0m"; //Red Diamond
-                case 3: return "\033[1;30m♣\033[0m"; //Black Club
+                case 0: return "♠"; //Spade
+                case 1: return "♥"; //Heart
+                case 2: return  "♦"; //Diamond
+                case 3: return "♣"; //Club
                 default: return "?";
-            }
+            }    
         }
+        // // ANSI Escape Codes can be enabled so that text output has color, but this is fragile and dependent on OS
+        // std::string get_suit_display () {
+        //     switch(this -> suit){
+        //         case 0: return "\033[1;30m♠\033[0m"; //Black Spade
+        //         case 1: return "\033[1;31m♥\033[0m"; //Red Heart
+        //         case 2: return  "\033[1;31m♦\033[0m"; //Red Diamond
+        //         case 3: return "\033[1;30m♣\033[0m"; //Black Club
+        //         default: return "?";
+        //     }
+        // }
 
         std::string get_card_display() {
             return get_value_display() +get_suit_display();

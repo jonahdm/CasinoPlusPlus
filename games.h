@@ -157,10 +157,13 @@ class BlackJack : public Game{
         // Establish the first set of viable actions in the game
         actions = {"Hit", "Stand", "Double", "Surrender"};
 
-        // Print out new game text (with colorful symbols!)
-        std::cout << "\n\033[1;30m♠\033[0m\033[1;31m♥\033[0m\033[1;31m♦\033[0m\033[1;30m♣\033[0m "
-        "Beginning a new game of Blackjack. "
-        "\033[1;30m♠\033[0m\033[1;31m♥\033[0m\033[1;31m♦\033[0m\033[1;30m♣\033[0m\n\n";
+        // Output new game text
+        std::cout << "\n♠♥♦♣ Beginning a new game of Blackjack ♠♥♦♣\n";
+
+        // // ANSI Escape Codes can be enabled so that text output has color, but this is fragile and dependent on OS
+        // std::cout << "\n\033[1;30m♠\033[0m\033[1;31m♥\033[0m\033[1;31m♦\033[0m\033[1;30m♣\033[0m "
+        // "Beginning a new game of Blackjack. "
+        // "\033[1;30m♠\033[0m\033[1;31m♥\033[0m\033[1;31m♦\033[0m\033[1;30m♣\033[0m\n\n";
 
         // Create the standard deck of cards
         deck.build_standard_deck();
