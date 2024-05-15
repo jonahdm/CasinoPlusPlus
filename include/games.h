@@ -211,7 +211,14 @@ class BlackJack : public Game{
                             curr_player_active = false;
                             continue;
                         } else {
-                            std::cout << "\n" << players[i]->name << "'s turn! ";
+
+                            if (players[i]->type == 0){
+                                std::cout << "\n" <<"Your turn! ";
+                            } else if (players[i]->type == 1){
+                                std::cout << "\n" << players[i]->name << "'s turn! ";
+                            } else {
+                                std::cout << "\nDealer " << players[i]->name << "'s turn! ";
+                            }
                             display_current_player_hand(*players[i]);
                             first_move = false;
                         }
@@ -233,13 +240,25 @@ class BlackJack : public Game{
                 int player_score = curr_player->current_score;
 
                 if ((player_score > 21) || (player_score < dealer_score) && (dealer_score <= 21)){ // If the player busted, or their score was less than the dealer's
-                    std::cout << curr_player->name << " Loses $" << curr_player->current_bet << "!\n";
+                    if (players[i]->type == 0){
+                        std::cout << "You lose $" << curr_player->current_bet << "!\n";
+                    } else {
+                        std::cout << players[i]->name << " loses $" << curr_player->current_bet << "!\n";
+                    }
                     lose_bet(curr_player);
                 } else if ((player_score > dealer_score) || (player_score < dealer_score) && (dealer_score > 21)){
-                    std::cout << curr_player->name << " Wins $" << curr_player->current_bet << "!\n";
+                    if (players[i]->type == 0){
+                        std::cout << "You win $" << curr_player->current_bet << "!\n";
+                    } else {
+                        std::cout << players[i]->name << " wins $" << curr_player->current_bet << "!\n";
+                    }
                     win_bet(curr_player, 2); // A normal win returns 2:1 odds
                 } else if (player_score == dealer_score){
-                    std::cout << curr_player->name << " ties with the dealer! $" << curr_player->current_bet << " returned!\n";
+                    if (players[i]->type == 0){
+                        std::cout << "You tie with the dealer! You have" << curr_player->current_bet << " returned!\n";
+                    } else {
+                        std::cout << players[i]->name << " ties with the dealer! " << players[i]->name << " has " << curr_player->current_bet << " returned!\n";
+                    }
                     tie_bet(curr_player);
                 }
             }
@@ -287,7 +306,12 @@ class BlackJack : public Game{
         } else if (selection == "Double") {
             curr_player->inventory -= curr_player->current_bet;
             curr_player->current_bet += curr_player->current_bet;
-            std::cout << curr_player->name << " Doubles! Their new bet is: $" << curr_player->current_bet << "\n";
+
+            if (curr_player->type == 0){
+                std::cout << "You double! Your new bet is: $" << curr_player->current_bet << "\n";
+            } else {
+                std::cout << curr_player->name << " Doubles! Their new bet is: $" << curr_player->current_bet << "\n";
+            }
 
             hit(curr_player->hand, deck);
             has_legal_moves = false;
@@ -338,7 +362,12 @@ class BlackJack : public Game{
     }
 
     void display_current_player_hand(Player& curr_player) {
-        std::cout << curr_player.name << "'s Hand is: " << curr_player.hand.get_contents_display() << "\n";
+        if (curr_player.type == 0){
+            std::cout << "Your hand is: " << curr_player.hand.get_contents_display() << "\n";
+
+        } else {
+            std::cout << curr_player.name << "'s hand is: " << curr_player.hand.get_contents_display() << "\n";
+        }
     }
 
     std::string player_choose_move(Player& curr_player) { // Reference to player here for future implementation of stats to weight decisions

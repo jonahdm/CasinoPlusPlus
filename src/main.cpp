@@ -11,17 +11,25 @@
 
 int main()
 {
-    std::cout <<  "${workspaceFolder}" << "\n";
-    Player p("Player", "human", 500);
+    setlocale(LC_ALL, ".UTF-8"); // Needed to properly display Unicode in VSCode Terminal
+    std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
+
+    std::cout << "Welcome stranger. Care to share your name?\n\n";
+
+    std::string player_name;
+    std::cin >> player_name;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    // Create character profiles, incuding the human player's
+    Player p(player_name, "human", 500);
     Player d("Dean", "dealer", 1000);
     Player a("Alan", "player", 500); 
     Player b("Bob", "player", 500);
     std::vector<Player *> players = {&p , &d, &a, &b};
 
-    setlocale(LC_ALL, ".UTF-8"); // Needed to properly display Unicode in VSCode Terminal
-    std::locale::global(std::locale(".UTF-8")); // Needed to properly display Unicode in VSCode Terminal
-
-    std::cout << "Welcome to the casino.\n"
+    std::cout << 
+    "\nWelcome, " << player_name << "\n" <<
     "Enter a digit to pick your poison:\n\n"
     "1: Blackjack\n"
     "2: Exit.\n\n";
