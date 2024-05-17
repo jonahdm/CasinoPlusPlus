@@ -239,6 +239,9 @@ class BlackJack : public Game{
                                 first_move = false;
                             }
                         }
+                        if (curr_hand->bet > curr_player->inventory.money){ // A player can only split or double if they have the funds to make their bet again
+                            actions = {"Hit", "Stand", "Surrender"};
+                        }
                         curr_hand_active = next_move(curr_player, curr_hand);
                     } while (curr_hand_active == true);
                     hand_count ++;
@@ -283,8 +286,10 @@ class BlackJack : public Game{
                             tie_bet(curr_player, &curr_hand);
                     }
                 }
+                curr_player->hands.clear(); // Empty the current player's hand after resolving their play.
             }
         }   
+        dealer -> hands.clear(); // Emtpy the dealer's hand as well, as they were skipped in the above.
         
         actions = {"Yes", "No"};
         std::cout << "\nContinue playing?\n";
