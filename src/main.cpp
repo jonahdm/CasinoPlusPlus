@@ -7,7 +7,7 @@
 #include "..\include\games.h"
 #include "..\include\cards.h"
 #include "..\include\inventories.h"
-#include "..\include\players.h"
+#include "..\include\characters.h"
 
 int main()
 {
@@ -21,12 +21,12 @@ int main()
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
-    // Create character profiles, incuding the human player's
-    Player p(player_name, "human", 500);
-    Player d("Dean", "dealer", 1000);
-    Player a("Alan", "player", 500); 
-    Player b("Bob", "player", 500);
-    std::vector<Player *> players = {&p , &d, &a, &b};
+    // Create character profiles, incuding the human character's
+    Character p(player_name, "human", 500);
+    Character d("Dean", "dealer", 1000);
+    Character a("Alan", "character", 500); 
+    Character b("Bob", "character", 500);
+    std::vector<Character *> players = {&p , &d, &a, &b};
 
     std::cout << 
     "\nWelcome, " << player_name << "\n" <<

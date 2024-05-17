@@ -2,6 +2,7 @@
 #define CARDS
 
 #include <algorithm>
+#include <list>
 #include <numeric>       
 #include <random>
 #include <string>
@@ -60,7 +61,7 @@ class Card {
 class Deck {
     public:
         std::vector<Card> contents;
-
+        
     int size(){
         return contents.size();
     }
@@ -124,6 +125,24 @@ class Deck {
         return drawn_card;
     }
 
+    bool has_any_duplicates() {
+        if (contents.size() < 2){
+            return false;
+        }
+
+        else {
+            std::vector<int> icontents;
+            for (int i = 0; i < contents.size(); i ++){
+                icontents.push_back(contents[i].value);
+            }
+            std::sort(icontents.begin(), icontents.end());
+            return (std::adjacent_find(icontents.begin(), icontents.end()) != icontents.end()); // This is true if adjacent_find doesn't reach the end of the array (meaning duplicates were found)
+            //     return false;
+            // } else {
+            //     return true;
+            // }
+        }
+    }
 
     Deck draw_n_cards(int n) {
         Deck drawn_cards;
