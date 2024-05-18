@@ -104,7 +104,8 @@ class Game {
     }
 
     void win_bet(Character* character, CharacterHand* hand, int odds){
-        character->inventory += (hand->bet * odds);
+        character->inventory += hand -> bet; // Wins return the original wager as well
+        character->inventory += round(hand->bet * odds);
         hand->bet = 0;
     }
 
@@ -227,7 +228,7 @@ class BlackJack : public Game{
                             if (curr_hand->score == 21){
                                 // 21 on the first hand is a BlackJack, which pays 3:2 odds.
                                 std::cout << "\n" << curr_player->name << " Has BlackJack! ";
-                                curr_hand->bet =  round((curr_hand->bet) * 3/2);
+                                curr_hand->blackJack = true;
                                 curr_hand_active = false;
                                 continue;
                             } 
@@ -254,13 +255,12 @@ class BlackJack : public Game{
         std::cout << "\n";
         display_game_state();
         std::cout << "\n";
-
+        int player_money = 0;
         // For each active character, check their score against the dealer's to determine win/loss/tie
         for (Character* curr_player : characters){
             if (!(std::find(inactive_characters.begin(), inactive_characters.end(), curr_player) != inactive_characters.end()) // If the current character id is not in the inactive list 
-                || (curr_player->type != 2)){ // OR current character is not the dealer.
+                && (curr_player->type != 2)){ // OR current character is not the dealer.
                     for (CharacterHand& curr_hand : curr_player->hands){
-
                         int character_score = curr_hand.score;
 
                         if ((character_score > 21) || (character_score < dealer_score) && (dealer_score <= 21)){ // If the character busted, or their score was less than the dealer's
@@ -272,25 +272,40 @@ class BlackJack : public Game{
                             lose_bet(curr_player, &curr_hand);
                         } else if ((character_score > dealer_score) || (character_score < dealer_score) && (dealer_score > 21)){
                             if (curr_player->type == 0){
-                                std::cout << "You win $" << curr_hand.bet << "!\n";
+                                std::cout << "You win $";
                             } else {
-                                std::cout << curr_player->name << " wins $" << curr_hand.bet << "!\n";
+                                std::cout << curr_player->name << " wins $";
                             }
-                            win_bet(curr_player, &curr_hand, 2); // A normal win returns 2:1 odds
+
+                            if (curr_hand.blackJack == true){
+                                 std::cout << round(curr_hand.bet * 3/2) << "!\n";
+                                win_bet(curr_player, &curr_hand, 3/2); // A winning BlackJack gives 3:2
+                            } else {
+                                std::cout << curr_hand.bet << "!\n";
+                                win_bet(curr_player, &curr_hand, 1); // A normal win returns 1:1
+                            }
+
+
                         } else if (character_score == dealer_score){
                             if (curr_player->type == 0){
-                                std::cout << "You tie with the dealer! You have" << curr_hand.bet << " returned!\n";
+                                std::cout << "You tie with the dealer! You have $" << curr_hand.bet << " returned!\n";
                             } else {
-                                std::cout << curr_player->name << " ties with the dealer! " << curr_player->name << " has " << curr_hand.bet << " returned!\n";
+                                std::cout << curr_player->name << " ties with the dealer! " << curr_player->name << " has $" << curr_hand.bet << " returned!\n";
                             }
                             tie_bet(curr_player, &curr_hand);
                     }
                 }
-                curr_player->hands.clear(); // Empty the current player's hand after resolving their play.
+                if (curr_player -> type == 0){
+                    player_money = curr_player->inventory.money;
+                }
+            }
+            if (curr_player->type != 2){
+                curr_player->hands.clear(); // Empty the current player's hand after resolving their play. Skip the dealer here in case they are somehow not last in turn order.
             }
         }   
         dealer -> hands.clear(); // Emtpy the dealer's hand as well, as they were skipped in the above.
-        
+
+        std::cout << "You have $" << player_money << "\n";
         actions = {"Yes", "No"};
         std::cout << "\nContinue playing?\n";
         int choice = action_select() + 1;

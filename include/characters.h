@@ -13,6 +13,8 @@ struct CharacterHand {
     int bet;
     int score;
 
+    bool blackJack = false;
+
     // CharacterHand(): bet(0), score(0) {}
 
     CharacterHand(int bet = 0): bet(bet), score(0) {}
