@@ -117,6 +117,11 @@ class Game {
         character->inventory += hand->bet;
         hand->bet = 0;
     }
+
+    void surrendered_bet(Character* character, CharacterHand* hand){
+        character->inventory += round(hand->bet/2);
+        hand->bet = 0;
+    }
 };
 
 class BlackJack : public Game{
@@ -259,42 +264,48 @@ class BlackJack : public Game{
         // For each active character, check their score against the dealer's to determine win/loss/tie
         for (Character* curr_player : characters){
             if (!(std::find(inactive_characters.begin(), inactive_characters.end(), curr_player) != inactive_characters.end()) // If the current character id is not in the inactive list 
-                && (curr_player->type != 2)){ // OR current character is not the dealer.
+                && (curr_player->type != 2)){ // and current character is not the dealer.
                     for (CharacterHand& curr_hand : curr_player->hands){
-                        int character_score = curr_hand.score;
+                        if (curr_hand.surrendered == false) {
+                            int character_score = curr_hand.score;
+                            if ((character_score > 21) || (character_score < dealer_score) && (dealer_score <= 21)){ // If the character busted, or their score was less than the dealer's
+                                if (curr_player->type == 0){
+                                    std::cout << "You lose $" << curr_hand.bet << "!\n";
+                                } else {
+                                    std::cout << curr_player->name << " loses $" << curr_hand.bet << "!\n";
+                                }
+                                lose_bet(curr_player, &curr_hand);
+                            } else if ((character_score > dealer_score) || (character_score < dealer_score) && (dealer_score > 21)){
+                                if (curr_player->type == 0){
+                                    std::cout << "You win $";
+                                } else {
+                                    std::cout << curr_player->name << " wins $";
+                                }
 
-                        if ((character_score > 21) || (character_score < dealer_score) && (dealer_score <= 21)){ // If the character busted, or their score was less than the dealer's
+                                if (curr_hand.blackJack == true){
+                                    std::cout << round(curr_hand.bet * 3/2) << "!\n";
+                                    win_bet(curr_player, &curr_hand, 3/2); // A winning BlackJack gives 3:2
+                                } else {
+                                    std::cout << curr_hand.bet << "!\n";
+                                    win_bet(curr_player, &curr_hand, 1); // A normal win returns 1:1
+                                }
+                            } else if (character_score == dealer_score){
+                                if (curr_player->type == 0){
+                                    std::cout << "You tie with the dealer! You have $" << curr_hand.bet << " returned!\n";
+                                } else {
+                                    std::cout << curr_player->name << " ties with the dealer! " << curr_player->name << " has $" << curr_hand.bet << " returned!\n";
+                                }
+                                tie_bet(curr_player, &curr_hand);
+                        }
+                        } else { // If player surrendered their hand, they get half their bet returned
                             if (curr_player->type == 0){
-                                std::cout << "You lose $" << curr_hand.bet << "!\n";
+                                std::cout << "You surrendered your hand! You have $" << round(curr_hand.bet / 2) << " returned!\n";
                             } else {
-                                std::cout << curr_player->name << " loses $" << curr_hand.bet << "!\n";
+                                std::cout << curr_player->name << " surrendered their hand! " << curr_player->name << " has $" << round(curr_hand.bet / 2) << " returned!\n";
                             }
-                            lose_bet(curr_player, &curr_hand);
-                        } else if ((character_score > dealer_score) || (character_score < dealer_score) && (dealer_score > 21)){
-                            if (curr_player->type == 0){
-                                std::cout << "You win $";
-                            } else {
-                                std::cout << curr_player->name << " wins $";
-                            }
-
-                            if (curr_hand.blackJack == true){
-                                 std::cout << round(curr_hand.bet * 3/2) << "!\n";
-                                win_bet(curr_player, &curr_hand, 3/2); // A winning BlackJack gives 3:2
-                            } else {
-                                std::cout << curr_hand.bet << "!\n";
-                                win_bet(curr_player, &curr_hand, 1); // A normal win returns 1:1
-                            }
-
-
-                        } else if (character_score == dealer_score){
-                            if (curr_player->type == 0){
-                                std::cout << "You tie with the dealer! You have $" << curr_hand.bet << " returned!\n";
-                            } else {
-                                std::cout << curr_player->name << " ties with the dealer! " << curr_player->name << " has $" << curr_hand.bet << " returned!\n";
-                            }
-                            tie_bet(curr_player, &curr_hand);
-                    }
-                }
+                            surrendered_bet(curr_player, &curr_hand);
+                        }
+                    } 
                 if (curr_player -> type == 0){
                     player_money = curr_player->inventory.money;
                 }
@@ -362,20 +373,23 @@ class BlackJack : public Game{
             std::cout << curr_player->name << " Splits! ";
             actions = {"Hit", "Stand", "Double", "Surrender"}; // Return the action selection to normal
         } else if (selection == "Surrender") {
-            std::cout << curr_player->name << " Surrenders! ";
+            std::cout << curr_player->name << " Surrenders!\n" << round(curr_hand->bet / 2) << "\n";
+            curr_hand->surrendered = true;
             has_legal_moves = false;
         }
 
-        display_character_hand(*curr_player, *curr_hand);
-        curr_hand->score = curr_hand->cards.get_total_value_blackjack();
+        if (curr_hand->surrendered == false) {
+            display_character_hand(*curr_player, *curr_hand);
+            curr_hand->score = curr_hand->cards.get_total_value_blackjack();
 
-        if (curr_hand->score > 21){
-            std::cout << curr_player->name << " Busts!\n";
-            has_legal_moves = false;
-        } else if (curr_hand->score == 21){
-            std::cout << curr_player->name << " Has 21!\n";
-            has_legal_moves = false;
-        } else {
+            if (curr_hand->score > 21){
+                std::cout << curr_player->name << " Busts!\n";
+                has_legal_moves = false;
+            } else if (curr_hand->score == 21){
+                std::cout << curr_player->name << " Has 21!\n";
+                has_legal_moves = false;
+            } else {
+            }
         }
 
         return has_legal_moves;
@@ -393,12 +407,14 @@ class BlackJack : public Game{
         for (Character* curr_player : characters){
             if (!(std::find(inactive_characters.begin(), inactive_characters.end(), curr_player) != inactive_characters.end())){ // If the current character id is not in the inactive list
                 for (CharacterHand curr_hand : curr_player -> hands){
-                    if (curr_player -> type == 0){
-                        std::cout << "Your hand is: " << curr_hand.cards.get_contents_display() << "\n";
-                    } else if (curr_player -> type == 2){
-                        std::cout << "Dealer " << curr_player->name << "'s hand is: " << curr_hand.cards.get_contents_display() << "\n";
-                    } else {
-                        std::cout << curr_player->name << "'s hand is: " << curr_hand.cards.get_contents_display() << "\n";
+                    if (curr_hand.surrendered == false){
+                        if (curr_player -> type == 0){
+                            std::cout << "Your hand is: " << curr_hand.cards.get_contents_display() << "\n";
+                        } else if (curr_player -> type == 2){
+                            std::cout << "Dealer " << curr_player->name << "'s hand is: " << curr_hand.cards.get_contents_display() << "\n";
+                        } else {
+                            std::cout << curr_player->name << "'s hand is: " << curr_hand.cards.get_contents_display() << "\n";
+                        }
                     }
                 }
             }
