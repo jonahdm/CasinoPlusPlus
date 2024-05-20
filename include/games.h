@@ -36,7 +36,7 @@ class Game {
         do {
             std::cin >> choice;
             if (!std::isdigit(choice[0])) { // If the input isn't a number
-                std::cout << "You need to bet a NUMBER. Try again.\n";
+                std::cout << "You need to enter a NUMBER. Try again.\n";
             } else {
                 ichoice = stoi(choice);
                 if ((ichoice  > actions.size() || (ichoice  == 0))) { // If input isn't a number OR the input digit is outside acceptable range
@@ -241,6 +241,7 @@ class BlackJack : public Game{
                                 if (curr_hand->cards.has_any_duplicates() == true){ // If it is the first draw and a hand has duplicates, splitting is allowed
                                     actions = {"Hit", "Stand", "Double", "Split", "Surrender"};
                                 }
+                                std::cout << "\n";
                                 display_character_hand(*curr_player, *curr_hand);
                                 first_move = false;
                             }
@@ -248,7 +249,7 @@ class BlackJack : public Game{
                         if (curr_hand->bet > curr_player->inventory.money){ // A player can only split or double if they have the funds to make their bet again
                             actions = {"Hit", "Stand", "Surrender"};
                         }
-                        curr_hand_active = next_move(curr_player, curr_hand);
+                        curr_hand_active = next_move(curr_player, curr_hand, &hand_count);
                     } while (curr_hand_active == true);
                     hand_count ++;
                 } while (hand_count < curr_player->hands.size());
@@ -333,8 +334,9 @@ class BlackJack : public Game{
         return keep_playing;
     }
 
-    bool next_move(Character* curr_player, CharacterHand* curr_hand) {
+    bool next_move(Character* curr_player, CharacterHand* curr_hand, int* hand_count) {
         bool has_legal_moves = true;
+        bool split = false;
         std::string selection;
 
         switch(curr_player->type){
@@ -353,9 +355,11 @@ class BlackJack : public Game{
         if (selection == "Hit") {
             std::cout << curr_player->name << " Hits! ";
             hit(curr_hand->cards, deck);
+
         } else if (selection == "Stand") {
             std::cout << curr_player->name << " Stands! ";
             has_legal_moves = false;
+
         } else if (selection == "Double") {
             curr_player->inventory -= curr_hand->bet;
             curr_hand->bet += curr_hand->bet;
@@ -370,15 +374,41 @@ class BlackJack : public Game{
             has_legal_moves = false;
 
         } else if (selection == "Split") {
-            std::cout << curr_player->name << " Splits! ";
+            std::cout << curr_player->name << " Splits!\n";
+
+            // Create a new player hand by drawing a card from the current hand
+            Deck new_deck;
+            new_deck.add_bottom_card(curr_hand->cards.draw_top_card());
+
+            // Each new hand gets a card after the split
+            hit(curr_hand->cards, deck);
+            hit(new_deck, deck);
+
+            CharacterHand new_hand(new_deck, curr_hand->bet);
+
+            // Add the new deck to the new player hand, and subtract the bet amount from their inventory
+            curr_player->inventory -= curr_hand->bet;
+            curr_player->hands.push_back(new_hand);
+            curr_hand = &(curr_player->hands[*hand_count]); // Because the hands vector was modified, the reference to it needs to be updated.
+            *hand_count = *hand_count - 1; // Stops the do while gameplay loop from breaking early.
+            split = true;
+            
+            if (curr_player->type == 0){
+                std::cout << "Your new hands are: " << curr_hand->cards.get_contents_display() << "and " << new_deck.get_contents_display() << "\n\n";
+            } else {
+                std::cout << curr_player->name << " Doubles! Their new hands are: " << curr_hand->cards.get_contents_display() << "and " << new_deck.get_contents_display() << "\n\n";
+            }
+            
             actions = {"Hit", "Stand", "Double", "Surrender"}; // Return the action selection to normal
+            has_legal_moves = false; // Although this hand is still in play, we need to signal false so that the game loop moves to the next reference
+
         } else if (selection == "Surrender") {
             std::cout << curr_player->name << " Surrenders!\n" << round(curr_hand->bet / 2) << "\n";
             curr_hand->surrendered = true;
             has_legal_moves = false;
         }
 
-        if (curr_hand->surrendered == false) {
+        if ((curr_hand->surrendered == false) && (split == false)){
             display_character_hand(*curr_player, *curr_hand);
             curr_hand->score = curr_hand->cards.get_total_value_blackjack();
 
@@ -397,10 +427,6 @@ class BlackJack : public Game{
 
     void hit(Deck& curr_hand, Deck& curr_deck) {
         curr_hand.add_top_card(curr_deck.draw_top_card());
-    }
-
-    void split() {
-
     }
 
     void display_game_state() {

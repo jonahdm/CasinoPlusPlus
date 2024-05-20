@@ -20,6 +20,8 @@ struct CharacterHand {
 
     CharacterHand(int bet = 0): bet(bet), score(0) {}
     CharacterHand(Deck cards): cards(cards), bet(0), score(0) {}
+    CharacterHand(Deck cards, int bet): cards(cards), bet(bet), score(0) {}
+
 };
 
 class Character {
